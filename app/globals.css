@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+body {
+  font-family: "Geist", sans-serif;
+  font-weight: 600;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+}
+
+/* Track */
+@keyframes progressBar {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+.animate-progressBar {
+  animation: progressBar 7s linear forwards;
+}
