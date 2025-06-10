@@ -3,10 +3,15 @@
 import { AuthContextProvider, useAuth } from "@/context/authcontext";
 import AdminLayout from "./components/AuthLayout";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, ReactNode } from "react";
 import { FaCircleUp } from "react-icons/fa6";
 
-const Layout = ({ children }) => {
+// Annotate props type
+type LayoutProps = {
+  children: ReactNode;
+};
+
+const Layout = ({ children }: LayoutProps) => {
   return (
     <AuthContextProvider>
       <AdminChecking>{children}</AdminChecking>
@@ -15,7 +20,7 @@ const Layout = ({ children }) => {
 };
 export default Layout;
 
-function AdminChecking({ children }) {
+function AdminChecking({ children }: LayoutProps) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
@@ -23,7 +28,7 @@ function AdminChecking({ children }) {
     if (!user && !isLoading) {
       router.push("/auth/login");
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, router]);
 
   if (isLoading) {
     return (
@@ -35,10 +40,10 @@ function AdminChecking({ children }) {
   if (!user) {
     return (
       <div className="w-full h-screen flex justify-center items-center">
-        {" "}
         Please Login First
       </div>
     );
   }
+
   return <AdminLayout>{children}</AdminLayout>;
 }

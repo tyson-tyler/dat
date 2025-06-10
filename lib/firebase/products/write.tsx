@@ -53,7 +53,7 @@ export const createNewProduct = async ({
     id: newId,
     featureImageURL,
     imageList: imageURLList,
-    timestampCreate: Timestamp.now(),
+    timestampCreate: Timestamp.now().toJSON(),
   });
 };
 
@@ -88,7 +88,7 @@ export const updateProduct = async ({
     ...data,
     featureImageURL,
     imageList: imageURLList,
-    timestampUpdate: Timestamp.now(),
+    timestampUpdate: Timestamp.now().toJSON(),
   });
 };
 

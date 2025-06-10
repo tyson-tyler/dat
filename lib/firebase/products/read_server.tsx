@@ -32,12 +32,12 @@ export const getProducts = async () => {
   return list.docs.map((snap) => snap.data());
 };
 
-export const getProductsByCategory = async ({ categoryId }) => {
+export const getProductsByCategory = async ({ catergoryId }) => {
   const list = await getDocs(
     query(
       collection(db, "products"),
       orderBy("timestampCreate", "desc"),
-      where("categoryId", "==", categoryId)
+      where("catergoryId", "==", catergoryId)
     )
   );
   return list.docs.map((snap) => snap.data());

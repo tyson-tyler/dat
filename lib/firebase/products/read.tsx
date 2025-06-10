@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore";
 import useSWRSubscription from "swr/subscription";
 
-export function useProducts({ pageLimit, lastSnapDoc }) {
+export function useProducts({ pageLimit, lastSnapDoc }: any) {
   const { data, error } = useSWRSubscription(
     ["products", pageLimit, lastSnapDoc],
     ([path, pageLimit, lastSnapDoc], { next }) => {
@@ -50,7 +50,7 @@ export function useProducts({ pageLimit, lastSnapDoc }) {
   };
 }
 
-export function useProduct({ productId }) {
+export function useProduct({ productId }: any) {
   const { data, error } = useSWRSubscription(
     ["products", productId],
     ([path, productId], { next }) => {
@@ -72,7 +72,7 @@ export function useProduct({ productId }) {
   };
 }
 
-export function useProductsByIds({ idsList }) {
+export function useProductsByIds({ idsList }: any) {
   const { data, error } = useSWRSubscription(
     ["products", idsList],
     ([path, idsList], { next }) => {

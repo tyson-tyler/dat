@@ -38,7 +38,7 @@ export const createNewCollection = async ({
     ...data,
     id: newId,
     imageURL,
-    timestampCreate: Timestamp.now(),
+    timestampCreate: Timestamp.now().toJSON(),
   });
 };
 interface UpdateCollectionProps {
@@ -66,7 +66,7 @@ export const updateCollection = async ({
   await updateDoc(doc(db, `collections/${id}`), {
     ...data,
     imageURL,
-    timestampUpdate: Timestamp.now(),
+    timestampUpdate: Timestamp.now().toJSON(),
   });
 };
 

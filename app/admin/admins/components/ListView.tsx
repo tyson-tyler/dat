@@ -1,5 +1,5 @@
 "use client";
-import { useAdmin } from "@/lib/firebase/admin/read";
+import { useAdmin, useAdmins } from "@/lib/firebase/admin/read";
 import { deleteAdmin } from "@/lib/firebase/admin/write";
 import { useCategories } from "@/lib/firebase/catergories/read"; // fix spelling if needed
 
@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import { BiLoader, BiPencil, BiTrash } from "react-icons/bi";
 
 const ListView = () => {
-  const { data: admins, error, isLoading } = useAdmin();
+  const { data: admins, error, isLoading } = useAdmins();
   const [isDeleting, setIsDeleting] = useState(false);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");

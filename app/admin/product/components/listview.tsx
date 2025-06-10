@@ -2,7 +2,7 @@
 
 import { useProducts } from "@/lib/firebase/products/read";
 import { deleteProduct } from "@/lib/firebase/products/write";
-import { Edit2, Loader2, Trash2 } from "lucide-react";
+import { CheckCircle, Edit2, Loader2, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -141,7 +141,12 @@ function ProductRow({ item, index }) {
           className="h-10 w-10 object-cover rounded-md"
         />
       </td>
-      <td className="px-4 py-3 whitespace-nowrap">{item.title}</td>
+      <td className="px-4 py-3 whitespace-nowrap flex gap-3 items-center ">
+        {item.title}{" "}
+        {item?.isFeatured === true && (
+          <CheckCircle className="w-4 h-4 text-green-500" />
+        )}
+      </td>
       <td className="px-4 py-3">
         <div className="text-sm text-gray-800 font-medium">₹{item.price}</div>
         {item.saleprice && (

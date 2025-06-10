@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Logo from "../../../public/logo.png";
@@ -11,7 +12,12 @@ import Facebook from "../../../public/facebook.svg";
 import Instagram from "../../../public/insta.svg";
 
 import Link from "next/link";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/authcontext";
@@ -34,10 +40,8 @@ const page = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left Image Section (hidden on md and below) */}
-
       {/* Left slider section (hidden on small screens) */}
-      <div className="hidden  h-screen lg:flex w-[70%]">
+      <div className="hidden h-screen lg:flex w-[70%]">
         <Swiper
           modules={[Autoplay]}
           autoplay={{ delay: 3000, disableOnInteraction: false }}
@@ -47,7 +51,7 @@ const page = () => {
           {images.map((src, index) => (
             <SwiperSlide key={index}>
               <div
-                className="w-full h-screen  bg-center bg-cover bg-no-repeat"
+                className="w-full h-screen bg-center bg-cover bg-no-repeat"
                 style={{ backgroundImage: `url(${src})` }}
               />
             </SwiperSlide>
@@ -56,8 +60,8 @@ const page = () => {
       </div>
 
       {/* Right Form Section */}
-      <div className="flex flex-col justify-center items-center bg-black text-white  h-screen w-full">
-        <div className="px-2 flex flex-col justify-center mb-5  items-center gap-2">
+      <div className="flex flex-col justify-center items-center bg-black text-white h-screen w-full">
+        <div className="px-2 flex flex-col justify-center mb-5 items-center gap-2">
           <Image src={Logo} alt="hello" width={60} height={60} />
           <span className="text-4xl font-semibold text-white">The Drrot</span>
         </div>
@@ -67,12 +71,11 @@ const page = () => {
 
         <div className="flex justify-center flex-col gap-5 items-center w-[70%]">
           <SignWithGoogleComponent />
-          <button className="h-[50px] flex justify-center items-center gap-3 bg-white  hover:bg-gray-200 text-black  rounded-4xl cursor-pointer w-full">
+          <button className="h-[50px] flex justify-center items-center gap-3 bg-white hover:bg-gray-200 text-black rounded-4xl cursor-pointer w-full">
             <Image src={Facebook} alt="GitHub Light" width={20} height={20} />
-
-            <span>Continue with Fackbook</span>
+            <span>Continue with Facebook</span>
           </button>
-          <button className="h-[50px] bg-rose-500 hover:bg-rose-600 flex justify-center items-center gap-3  rounded-4xl cursor-pointer w-full">
+          <button className="h-[50px] bg-rose-500 hover:bg-rose-600 flex justify-center items-center gap-3 rounded-4xl cursor-pointer w-full">
             <Image
               src={Instagram}
               width={20}
@@ -83,13 +86,15 @@ const page = () => {
             Continue with Instagram
           </button>
         </div>
-        <div className="mt-[40px] w-[340px] text-center text-sm ">
+
+        <div className="mt-[40px] w-[340px] text-center text-sm">
           By continuing, you agree to Drrot{" "}
           <b>Terms of Use and Privacy Policy.</b>
         </div>
+
         <div className="flex text-center gap-1 absolute bottom-4">
-          Don’t you have an account?{" "}
-          <Link href={"/auth/signup"} className="text-blue-500">
+          Don’t have an account?{" "}
+          <Link href="/auth/signup" className="text-blue-500">
             Sign up
           </Link>
         </div>
@@ -102,22 +107,33 @@ export default page;
 
 function SignWithGoogleComponent() {
   const [isLoading, setLoading] = useState(false);
+  const router = useRouter();
+
   const handleLogin = async () => {
     try {
       setLoading(true);
-      const user = await signInWithPopup(auth, new GoogleAuthProvider());
-      setLoading(false);
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      await setPersistence(auth, browserLocalPersistence);
+      await signInWithPopup(auth, provider);
+      toast.success("Successfully signed in!");
+      router.push("/");
     } catch (error) {
-      toast.error("Something Went Wrong");
+      toast.error("Something went wrong during login");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <button
       onClick={handleLogin}
-      className="h-[50px] bg-gray-800 hover:bg-gray-900 transition-colors flex justify-center items-center gap-3 rounded-4xl cursor-pointer w-full"
+      disabled={isLoading}
+      className="h-[50px] bg-gray-800 hover:bg-gray-900 transition-colors flex justify-center items-center gap-3 rounded-4xl cursor-pointer w-full disabled:opacity-50"
     >
-      <Image src={Google} width={20} height={20} alt="hello" />
-      <span>Continue with Google</span>
+      <Image src={Google} width={20} height={20} alt="Google logo" />
+      <span>{isLoading ? "Signing in..." : "Continue with Google"}</span>
     </button>
   );
 }

@@ -27,8 +27,11 @@ export default function DescriptionEditor({ data, handleData }: Props) {
   return (
     <section className="flex flex-col gap-3 bg-white border p-4 rounded-xl h-full">
       <h1 className="font-semibold">Description</h1>
-      <div className="border border-gray-300 rounded-md p-2">
-        <EditorContent editor={editor} />
+      <div className="border border-gray-300 overflow-hidden rounded-md p-2">
+        <EditorContent
+          className="max-h-[100px] overflow-y-scroll"
+          editor={editor}
+        />
       </div>
     </section>
   );

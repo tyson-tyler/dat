@@ -83,7 +83,6 @@ const ImageProp: React.FC<ImagePropTypes> = ({
             name="product-feature-image"
             className="absolute inset-0 opacity-0 cursor-pointer"
             accept="image/*"
-            required
           />
         </label>
       </div>

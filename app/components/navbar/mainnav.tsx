@@ -1,113 +1,186 @@
 "use client";
 
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useEffect, useState, useRef } from "react";
 import { BiSearch, BiMenu, BiX } from "react-icons/bi";
-import { motion, AnimatePresence } from "framer-motion";
-import { FaBagShopping } from "react-icons/fa6";
-import classNames from "classnames";
+import { FaUser } from "react-icons/fa";
+import { gsap } from "gsap";
 import { useRouter } from "next/navigation";
+import classNames from "classnames";
+import { AuthContextProvider, useAuth } from "@/context/authcontext";
+import HeaderClientButtons from "../HeaderClientButtons";
+
+const NAV_LINKS = [
+  { label: "HOME", href: "/" },
+  { label: "SHOP", href: "/categories/1aIpbpPn4qWIDAm59MWk" },
+  { label: "NEW PRODUCT", href: "/comman/review" },
+  { label: "BLOG", href: "/comman/blog" },
+  { label: "ABOUT", href: "/comman/about" },
+  { label: "CONTACT", href: "/comman/contact" },
+];
 
 const Mainnav = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const user = useAuth();
   const router = useRouter();
+  const navRef = useRef(null);
+  const menuRef = useRef(null);
+
   const onHandleAuthButton = () => {
-    router.push("/auth/login");
+    router.push("/auth/auth/login");
   };
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 50);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
     };
+    window.addEventListener("scroll", handleScroll);
 
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    if (navRef.current) {
+      gsap.fromTo(
+        navRef.current,
+        { y: -80, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, ease: "power2.out" }
+      );
+    }
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const toggleMenu = () => setMenuOpen(!menuOpen);
+  useEffect(() => {
+    if (menuOpen && menuRef.current) {
+      gsap.fromTo(
+        menuRef.current.children,
+        { y: 20, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          stagger: 0.1,
+          duration: 0.4,
+          ease: "power2.out",
+        }
+      );
+    }
+  }, [menuOpen]);
 
   return (
-    <div
+    <header
+      ref={navRef}
       className={classNames(
-        "fixed left-0 w-full z-50 transition-all duration-300",
+        "fixed top-0 left-0 w-full transition-all duration-300",
         scrolled
-          ? "top-0 bg-black text-white shadow-md"
-          : "md:top-[60px] top-[40px] bg-transparent text-white"
+          ? "bg-white shadow-md text-black"
+          : "top-4 text-white bg-transparent"
       )}
     >
-      <div className="flex items-center justify-between px-[20px] md:px-[60px] h-[70px]">
-        {/* Logo and Desktop Nav */}
-        <div className="flex items-center gap-2">
-          <Image src="/logo.png" alt="logo" width={50} height={50} />
-          <span className="text-xl font-semibold hidden md:flex">
-            The Drott
-          </span>
-
-          <div className="hidden lg:flex items-center gap-6 font-semibold ml-[80px]">
-            <span className="cursor-pointer">Home</span>
-            <span className="cursor-pointer">Shop</span>
-            <span className="cursor-pointer">Features</span>
-            <span className="cursor-pointer">Blog</span>
-            <span className="cursor-pointer">About</span>
-            <span className="cursor-pointer">Contact</span>
-          </div>
-        </div>
-
-        {/* Right-side icons */}
-        <div className="flex items-center gap-4">
-          <BiSearch className="w-5 h-5" />
-          <FaBagShopping className="w-5 h-5" />
-          <motion.button
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="hidden md:block px-5 py-3 text-sm rounded-full cursor-pointer font-semibold bg-purple-600 text-white shadow-md hover:opacity-90 transition"
-            onClick={onHandleAuthButton}
-          >
-            Join Now
-          </motion.button>
-
-          {/* Hamburger Icon on Mobile */}
-          <div className="md:hidden">
-            {menuOpen ? (
-              <BiX className="w-6 h-6 cursor-pointer" onClick={toggleMenu} />
-            ) : (
-              <BiMenu className="w-6 h-6 cursor-pointer" onClick={toggleMenu} />
+      <div className="flex items-center justify-between px-6 md:px-20 h-[72px]">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src={scrolled ? "/lightlogo.png" : "/logo.png"}
+            alt="logo"
+            width={42}
+            height={42}
+            priority
+          />
+          <span
+            className={classNames(
+              "text-xl md:flex items-center gap-1 font-semibold tracking-wide hidden",
+              {
+                "text-black": scrolled,
+                "text-white": !scrolled,
+              }
             )}
-          </div>
+          >
+            The{" "}
+            <p
+              className={classNames(
+                "tracking-tight leading-tight font-serif italic",
+                { "text-black": scrolled, "text-white": !scrolled }
+              )}
+            >
+              Drott
+            </p>
+          </span>
+        </Link>
+
+        {/* Desktop Nav */}
+        <nav className="hidden lg:flex gap-8 font-medium text-sm">
+          {NAV_LINKS.map(({ label, href }) => (
+            <Link
+              key={label}
+              href={href}
+              className="relative group cursor-pointer"
+            >
+              <span className="text-[13px] tracking-wide">{label}</span>
+              <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black dark:bg-white transition-all duration-300 group-hover:w-full" />
+            </Link>
+          ))}
+        </nav>
+
+        {/* Actions */}
+        <div className="flex items-center gap-5 ">
+          <Link
+            href="/search"
+            className={
+              scrolled
+                ? "hover:text-purple-400 transition text-black"
+                : "hover:text-purple-400 transition text-white"
+            }
+          >
+            <BiSearch size={20} />
+          </Link>
+
+          <AuthContextProvider>
+            <HeaderClientButtons />
+          </AuthContextProvider>
+
+          <Link
+            href="/account"
+            className={
+              scrolled
+                ? "hover:text-purple-400 transition text-black"
+                : "hover:text-purple-400 transition text-white"
+            }
+          >
+            <FaUser size={18} />
+          </Link>
+
+          {/* Hamburger */}
+          <button
+            className={
+              scrolled ? "lg:hidden text-black" : "lg:hidden text-white"
+            }
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <BiX size={26} /> : <BiMenu size={26} />}
+          </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="lg:hidden bg-black text-white px-4 pb-4"
-          >
-            <div className="flex flex-col gap-4 font-semibold pt-4">
-              <span className="cursor-pointer">Home</span>
-              <span className="cursor-pointer">Shop</span>
-              <span className="cursor-pointer">Features</span>
-              <span className="cursor-pointer">Blog</span>
-              <span className="cursor-pointer">About</span>
-              <span className="cursor-pointer">Contact</span>
-
-              <button
-                onClick={onHandleAuthButton}
-                className="w-full px-4 py-2 mt-2 rounded-full cursor-pointer bg-purple-600 text-white font-semibold shadow-md hover:opacity-90 transition"
-              >
-                Join Now
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      <div
+        ref={menuRef}
+        className={`lg:hidden bg-white text-black overflow-hidden transition-all duration-300 ${
+          menuOpen ? "py-5 px-6" : "h-0 px-6"
+        }`}
+      >
+        <nav className="flex flex-col gap-4 text-sm font-semibold">
+          {NAV_LINKS.map(({ label, href }) => (
+            <Link
+              key={label}
+              href={href}
+              className="relative group cursor-pointer"
+            >
+              <span className="text-[13px] tracking-wide">{label}</span>
+              <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black dark:bg-white transition-all duration-300 group-hover:w-full" />
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </header>
   );
 };
 

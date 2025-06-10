@@ -2,8 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import gsap from "gsap";
+import CustomEase from "gsap/CustomEase";
 import Mainnav from "../../navbar/mainnav";
+
+gsap.registerPlugin(CustomEase);
+CustomEase.create("hop", "0.7, 0, 0.1, 1.2");
 
 const words = ["Trending", "Stylish", "Comfortable", "Affordable", "Premium"];
 const buttonColors = [
@@ -16,162 +20,169 @@ const buttonColors = [
 
 const slideData = [
   {
-    img: "/images/img1.jpg",
+    img: "/1.jpg",
     title: "Urban Style",
+    description:
+      "Elevate your streetwear game with urban-inspired comfort and flair.",
   },
   {
-    img: "/images/img2.jpg",
+    img: "/3.jpg",
     title: "Cozy Fit",
+    description:
+      "Wrap yourself in warmth with our ultra-soft, cozy-fit t-shirts.",
   },
   {
-    img: "/images/img3.jpg",
+    img: "/5.jpg",
     title: "Classic White",
+    description:
+      "Timeless, versatile, and always in style — the essential white tee.",
   },
   {
-    img: "/images/img4.jpg",
+    img: "/6.jpg",
     title: "Bold & Bright",
+    description: "Make a statement with vibrant colors and standout prints.",
   },
 ];
 
 const Carousel = () => {
-  const [list, setList] = useState(slideData);
   const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState<"next" | "prev" | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const imgRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    const autoSlide = setInterval(() => handleSlide("next"), 7000);
-    return () => clearInterval(autoSlide);
-  }, [list]);
+  const animateSlide = () => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "hop" } });
 
-  const handleSlide = (type: "next" | "prev") => {
-    const newList = [...list];
-    const newIndex =
-      type === "next"
-        ? (index + 1) % words.length
-        : (index - 1 + words.length) % words.length;
-    setIndex(newIndex);
+      // Background transition
+      tl.set(imgRef.current, {
+        clipPath: "inset(0% 0% 100% 0%)",
+        scale: 1.15,
+        opacity: 0,
+      })
+        .to(imgRef.current, {
+          clipPath: "inset(0% 0% 0% 0%)",
+          scale: 1,
+          opacity: 1,
+          duration: 0.9,
+        })
 
-    if (type === "next") newList.push(newList.shift()!);
-    else newList.unshift(newList.pop()!);
+        // Title animation
+        .fromTo(
+          titleRef.current?.children,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: "power3.out",
+          },
+          "-=0.5"
+        )
 
-    setDirection(type);
-    setList(newList);
+        // Description
+        .fromTo(
+          descRef.current,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.4 },
+          "-=0.3"
+        )
 
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setDirection(null), 500);
+        // Button
+        .fromTo(
+          btnRef.current,
+          { scale: 0.9, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.4,
+            ease: "back.out(1.6)",
+          },
+          "-=0.3"
+        );
+    });
+
+    return () => ctx.revert();
   };
 
+  // Split heading into span letters
+  const splitLetters = (word: string) =>
+    word.split("").map((char, i) => (
+      <span key={i} className="inline-block">
+        {char}
+      </span>
+    ));
+
+  useEffect(() => {
+    animateSlide();
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % slideData.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [index]);
+
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
+    <div className="relative w-screen h-screen overflow-hidden bg-black text-white">
+      {/* Navbar */}
       <div className="absolute top-0 left-0 w-full z-30">
         <Mainnav />
       </div>
 
-      {/* Main Image */}
-      <div className="absolute inset-0 z-0">
-        <AnimatePresence initial={false} mode="wait">
-          <motion.div
-            key={list[0].img}
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="absolute inset-0"
-          >
-            <Image
-              src={list[0].img}
-              alt="main-carousel"
-              layout="fill"
-              className="object-cover w-full h-full"
-              priority
-            />
-          </motion.div>
-        </AnimatePresence>
+      {/* Background Image */}
+      <div
+        ref={imgRef}
+        className="absolute inset-0 w-full h-full z-0 transition-all"
+      >
+        <Image
+          src={slideData[index].img}
+          alt="carousel"
+          fill
+          className="object-cover"
+          priority
+        />
       </div>
 
-      {/* Overlay Text */}
+      {/* Text and CTA */}
       <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center px-4 sm:px-6 md:px-12">
-        <AnimatePresence mode="wait">
-          <motion.h1
-            key={words[index]}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-4"
-          >
-            {words[index]} T-Shirts
-          </motion.h1>
-        </AnimatePresence>
-
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={`desc-${words[index]}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.6 }}
-            className="text-gray-200 text-base sm:text-lg md:text-xl max-w-2xl mb-6"
-          >
-            Discover our collection of {words[index].toLowerCase()} t-shirts
-            designed for comfort, quality, and modern fashion.
-          </motion.p>
-        </AnimatePresence>
-
-        <motion.button
-          key={`btn-${index}`}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className={`px-6 py-2 sm:px-8 sm:py-3 text-white text-sm sm:text-base font-medium rounded-full shadow-md transition duration-500 ${buttonColors[index]}`}
+        <h1
+          ref={titleRef}
+          className="text-4xl sm:text-5xl md:text-6xl font-extrabold drop-shadow-lg"
+        >
+          {splitLetters(`${words[index]} `)} T-Shirts
+        </h1>
+        <p
+          ref={descRef}
+          className="text-gray-200 text-base sm:text-lg md:text-xl max-w-2xl mt-4"
+        >
+          {slideData[index].description}
+        </p>
+        <button
+          ref={btnRef}
+          className={`mt-6 px-6 py-3 sm:px-8 cursor-pointer sm:py-4 rounded-full font-semibold text-white text-sm sm:text-base transition-all hover:scale-105 ${buttonColors[index]}`}
         >
           Shop Now
-        </motion.button>
+        </button>
       </div>
 
-      {/* Thumbnails */}
-      <div className="absolute bottom-4 sm:bottom-12 left-1/2 -translate-x-1/2 z-20 w-full px-4 overflow-x-auto">
-        <div className="flex gap-4 sm:gap-5 justify-center min-w-[300px] sm:min-w-[600px]">
-          {list.map((slide, idx) => (
-            <div
-              key={idx}
-              className="w-[100px] sm:w-[150px] h-[140px] sm:h-[220px] relative overflow-hidden rounded-xl sm:rounded-2xl shrink-0"
-            >
-              <Image
-                src={slide.img}
-                alt={`thumb-${idx}`}
-                layout="fill"
-                objectFit="cover"
-              />
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-full text-center text-white text-xs sm:text-sm px-2">
-                <div className="font-semibold text-sm truncate ">
-                  {slide.title}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Arrows */}
-      <div className="absolute bottom-28 sm:bottom-20 right-1/2 translate-x-1/2 flex gap-4 z-20">
+      {/* Navigation Arrows */}
+      <div className="absolute bottom-24 sm:bottom-20 right-1/2 translate-x-1/2 flex gap-4 z-20">
         <button
-          onClick={() => handleSlide("prev")}
-          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/40 text-white font-bold hover:bg-white hover:text-black transition"
+          onClick={() =>
+            setIndex((index - 1 + slideData.length) % slideData.length)
+          }
+          className="w-10 h-10 rounded-full bg-white/30 text-white font-bold hover:bg-white hover:text-black transition"
         >
           &lt;
         </button>
         <button
-          onClick={() => handleSlide("next")}
-          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/40 text-white font-bold hover:bg-white hover:text-black transition"
+          onClick={() => setIndex((index + 1) % slideData.length)}
+          className="w-10 h-10 rounded-full bg-white/30 text-white font-bold hover:bg-white hover:text-black transition"
         >
           &gt;
         </button>
       </div>
-
-      {/* Progress Bar */}
-      <div className="absolute top-0 left-0 h-1 bg-orange-500 z-30 animate-progressBar w-full"></div>
     </div>
   );
 };
