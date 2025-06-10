@@ -147,7 +147,7 @@ export default async function Page({
       <SuccessMessage />
       <section className="min-h-screen flex flex-col gap-3 justify-center items-center">
         <div className="flex justify-center w-full">
-          <img src="/svgs/Mobile payments-rafiki.svg" className="h-48" alt="" />
+          <img src="/success.svg" className="h-48" alt="" />
         </div>
         <h1 className="text-2xl font-semibold text-green">
           Your Order Is{" "}

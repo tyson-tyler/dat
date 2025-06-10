@@ -1,12 +1,10 @@
-// app/(routes)/checkout-cod-success/page.tsx
-
+// app/(checkout)/checkout-cod/page.tsx
 import Productnav from "@/app/components/navbar/ProductNav";
 import Footer from "../../../app/components/footer/footer";
-import TopHeader from "@/app/components/navbar/topheader";
 import { admin, adminDB } from "@/lib/firebase_admin";
 import Link from "next/link";
 
-// Utility: remove undefined fields recursively for Firestore
+// Utility: recursively remove undefined fields for Firestore
 const removeUndefinedFields = (obj: any): any => {
   if (Array.isArray(obj)) {
     return obj.map(removeUndefinedFields);
@@ -58,7 +56,6 @@ const processOrder = async ({ checkout }: { checkout: CheckoutType }) => {
   }
 
   const uid = checkout?.metadata?.uid;
-
   const cleanedCheckout = removeUndefinedFields(checkout);
 
   await orderRef.set({
@@ -91,7 +88,6 @@ const processOrder = async ({ checkout }: { checkout: CheckoutType }) => {
   await userRef.set({ carts: updatedCart }, { merge: true });
 
   const batch = adminDB.batch();
-
   productList.forEach((item) => {
     const productRef = adminDB.doc(`products/${item.productId}`);
     batch.update(productRef, {
@@ -106,37 +102,72 @@ const processOrder = async ({ checkout }: { checkout: CheckoutType }) => {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: { checkout_id: string };
+  searchParams: { checkout_id?: string };
 }) {
   const { checkout_id } = searchParams;
 
-  const checkout = await fetchCheckout(checkout_id);
-  await processOrder({ checkout });
-
-  return (
-    <main>
-      <Productnav />
-      <section className="min-h-screen flex flex-col gap-3 justify-center items-center">
-        <div className="flex justify-center w-full">
-          <img
-            src="/svgs/Mobile payments-rafiki.svg"
-            className="h-48"
-            alt="Success"
-          />
-        </div>
-        <h1 className="text-2xl font-semibold text-green">
-          Your Order Is{" "}
-          <span className="font-bold text-green-600">Successfully</span> Placed
-        </h1>
-        <div className="flex items-center gap-4 text-sm">
-          <Link href="/account">
+  if (!checkout_id) {
+    return (
+      <main>
+        <Productnav />
+        <section className="min-h-screen flex flex-col gap-3 justify-center items-center">
+          <h1 className="text-2xl font-semibold text-red-500">
+            Missing checkout ID
+          </h1>
+          <Link href="/">
             <button className="text-blue-600 border border-blue-600 px-5 py-2 rounded-lg bg-white">
-              Go To Orders Page
+              Go to Home
             </button>
           </Link>
-        </div>
-      </section>
-      <Footer />
-    </main>
-  );
+        </section>
+        <Footer />
+      </main>
+    );
+  }
+
+  try {
+    const checkout = await fetchCheckout(checkout_id);
+    await processOrder({ checkout });
+
+    return (
+      <main>
+        <Productnav />
+        <section className="min-h-screen flex flex-col gap-3 justify-center items-center">
+          <div className="flex justify-center w-full">
+            <img src="/success.svg" className="h-48" alt="Success" />
+          </div>
+          <h1 className="text-2xl font-semibold text-green-600">
+            Your Order Is <span className="font-bold">Successfully</span> Placed
+          </h1>
+          <div className="flex items-center gap-4 text-sm">
+            <Link href="/account">
+              <button className="text-blue-600 border border-blue-600 px-5 py-2 rounded-lg bg-white">
+                Go To Orders Page
+              </button>
+            </Link>
+          </div>
+        </section>
+        <Footer />
+      </main>
+    );
+  } catch (err) {
+    console.error("Checkout processing failed:", err);
+
+    return (
+      <main>
+        <Productnav />
+        <section className="min-h-screen flex flex-col gap-3 justify-center items-center">
+          <h1 className="text-2xl font-semibold text-red-500">
+            Something went wrong while placing your order.
+          </h1>
+          <Link href="/support">
+            <button className="text-blue-600 border border-blue-600 px-5 py-2 rounded-lg bg-white">
+              Contact Support
+            </button>
+          </Link>
+        </section>
+        <Footer />
+      </main>
+    );
+  }
 }
