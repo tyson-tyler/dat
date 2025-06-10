@@ -4,9 +4,10 @@
 const nextConfig = {
   images: {
     domains: ["res.cloudinary.com", "images.hdqwalls.com"],
-    typescript: {
-      ignoreBuildErrors: true,
-    },
+  },
+
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 
