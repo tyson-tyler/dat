@@ -15,16 +15,21 @@ const removeUndefinedFields = (obj: any): any => {
 };
 
 export async function POST(req: NextRequest) {
+  let checkout_id: string | undefined;
+
+  // Parse JSON safely
   try {
-    const { checkout_id } = await req.json();
+    const body = await req.json();
+    checkout_id = body?.checkout_id;
+  } catch (err) {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
 
-    if (!checkout_id) {
-      return NextResponse.json(
-        { error: "Missing checkout ID" },
-        { status: 400 }
-      );
-    }
+  if (!checkout_id) {
+    return NextResponse.json({ error: "Missing checkout ID" }, { status: 400 });
+  }
 
+  try {
     const list = await adminDB
       .collectionGroup("checkout_sessions_cod")
       .where("id", "==", checkout_id)
