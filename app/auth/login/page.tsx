@@ -34,7 +34,7 @@ const page = () => {
   const { user } = useAuth();
   useEffect(() => {
     if (user) {
-      router.push("/dashboard");
+      router.push("/");
     }
   }, [user]);
 

@@ -3,6 +3,7 @@
 
 import { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
+import Link from "next/link";
 
 export default function ContactForm() {
   const form = useRef(null);
@@ -84,13 +85,13 @@ export default function ContactForm() {
 
         <p className="text-sm text-gray-400 mb-4">
           By submitting this form you agree to our{" "}
-          <a href="#" className="underline text-blue-400">
+          <Link href="#" className="underline text-blue-400">
             terms and conditions
-          </a>{" "}
+          </Link>{" "}
           and our{" "}
-          <a href="#" className="underline text-blue-400">
+          <Link href="#" className="underline text-blue-400">
             privacy policy
-          </a>
+          </Link>
           .
         </p>
 
