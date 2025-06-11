@@ -56,10 +56,10 @@ export default async function Home() {
         <WeddingBanner />
       </div>
 
-      <div className=" w-full mb-8">
+      {/* <div className=" w-full mb-8">
         <HeroTitle2 />
         <ProductsGridView products={products} />
-      </div>
+      </div> */}
 
       <div className="bg-white w-full ">
         <CustomerReviews />
